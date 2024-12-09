@@ -4,8 +4,10 @@ import bcrypt from "bcrypt";
 import {
   generateAccessToken,
   generateRefreshToken,
+  uploadImage,
 } from "../Methods/Methods.js";
 
+// Authentication Controllers 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
   if (!name) return res.status(400).json({ message: "Name is required" });
@@ -21,6 +23,7 @@ const registerUser = async (req, res) => {
     name,
     email,
     password,
+    profilePicture: imageUrl ? imageUrl : "",
   });
 
   const accessToken = generateAccessToken(newUser);
@@ -71,4 +74,75 @@ const logOutUser = async (req, res) => {
   res.status(200).json({ message: "User logged out successfully" });
 };
 
-export { registerUser, loginUser, logOutUser };
+const uploadImageToDb = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({
+    message: "Not valid Id "
+  })
+
+  if (!req.file) return res.status(400).json({
+    message: "No Image Uploaded"
+  })
+
+  const image = req.file.path;
+
+  if (!image) return res.status(400).json({
+    message: "No Image found"
+  })
+
+  const user = await userModel.findOne({ _id: id });
+  if (!user) return res.status(400).json({
+    message: "User does not exist"
+  })
+
+  try {
+    const imageUrl = await uploadImage(image);
+    const updatedUser = await userModel.findOneAndUpdate({ _id: id }, {
+      profilePicture: imageUrl
+    });
+    return res.status(200).json({
+      message: "File uploaded and database updated successfully",
+      imageUrl,
+      user: updatedUser
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error uploading file",
+      error: error.message
+    });
+  }
+}
+
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  if (!req.body) return res.status(400).json({
+    message: "No data provided"
+  })
+
+  const user = await userModel.findOne({ _id: id });
+  if (!user) return res.status(400).json({
+    message: "User does not exist"
+  })
+  const updatedUser = await userModel.findByIdAndUpdate({ _id: id }, {
+    ...req.body
+  });
+}
+
+const getSingleUser = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({
+    message: "Not valid Id "
+  })
+
+  const user = await userModel.findOne({ _id: id });
+  if (!user) return res.status(400).json({
+    message: "User does not exist"
+  })
+  return res.status(200).json({
+    message: "User fetched successfully",
+    user
+  })
+}
+
+export { registerUser, loginUser, logOutUser, uploadImageToDb, updateUser, getSingleUser };
