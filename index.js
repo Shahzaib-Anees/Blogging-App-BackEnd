@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { userRoutes } from "./src/routes/user.routes.js";
 import connectDB from "./src/db/index.js";
+import { blogRoutes } from "./src/routes/blog.routes.js";
 dotenv.config();
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(cookieParser());
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/blog", blogRoutes);
 
 (async () => {
   try {

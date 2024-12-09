@@ -6,7 +6,7 @@ import {
   uploadImageToDb,
   updateUser,
   getSingleUser
-} from "../controllers/controllers.js";
+} from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
 const userRoutes = express.Router();
 

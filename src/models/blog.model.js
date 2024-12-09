@@ -22,10 +22,6 @@ const blogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    numViews: {
-      type: Number,
-      default: 0,
-    },
     reactions: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "User",
